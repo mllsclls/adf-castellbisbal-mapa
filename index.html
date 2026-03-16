@@ -143,6 +143,10 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#1A1A1A;display:flex;flex
 .prev{font-size:11px;color:#AAA;margin-top:4px}
 .pbtn{margin-top:8px;width:100%;background:#1A1A1A;color:#fff;border:none;padding:5px 8px;border-radius:4px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500}
 .pbadge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;text-transform:uppercase;margin-right:4px;margin-bottom:5px}
+/* Prioritat colors */
+.pri-baixa{background:#95A5A6;color:#fff}
+.pri-normal{background:#2980B9;color:#fff}
+.pri-alta{background:#C0392B;color:#fff}
 
 /* Mobil */
 @media (max-width:600px){
@@ -220,6 +224,10 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#1A1A1A;display:flex;flex
 
   <div id="mw">
     <div id="map"></div>
+    <div id="map-pick-banner" style="display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:1500;background:#E67E22;color:#fff;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:600;align-items:center;gap:10px;box-shadow:0 3px 10px rgba(0,0,0,.3);font-family:sans-serif">
+      <span>Toca el mapa per seleccionar la ubicacio</span>
+      <button onclick="toggleManualLoc()" style="background:rgba(255,255,255,.25);border:none;color:#fff;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600">Cancellar</button>
+    </div>
     <button id="locbtn" onclick="locate()" title="La meva ubicacio">
       <svg viewBox="0 0 24 24" fill="none" stroke="#1A5276" stroke-width="2.5" width="18" height="18"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22"/><circle cx="12" cy="12" r="8" stroke-width="1.5"/></svg>
     </button>
@@ -264,11 +272,23 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#1A1A1A;display:flex;flex
   <div class="pan">
     <div class="ph" style="background:var(--red)"><h2>Reportar incidencia</h2><button class="pc" onclick="closeOv('new')">x</button></div>
     <div class="pb">
-      <div class="wbox">La incidencia es geolocalitzara automaticament. Accepta els permisos si el navegador els demana.</div>
       <div class="fg"><label>Titol *</label><input type="text" id="ftit" placeholder="Ex: Bassa seca, tanca trencada..."/></div>
       <div class="fg"><label>Descripcio</label><textarea id="fdesc" placeholder="Descriu la incidencia..."></textarea></div>
       <div class="fg"><label>Reporter</label><input type="text" id="frep" placeholder="El teu nom (opcional)"/></div>
+      <div class="fg">
+        <label>Prioritat</label>
+        <select id="fpri">
+          <option value="baixa">Baixa</option>
+          <option value="normal" selected>Normal</option>
+          <option value="alta">Alta</option>
+        </select>
+      </div>
       <div class="locs" id="locs">Obtenint GPS...</div>
+      <div style="margin-bottom:10px">
+        <button id="btn-manual-loc" onclick="toggleManualLoc()" style="width:100%;background:#F7F7F7;border:1px solid #D0D0D0;color:#555;padding:7px 10px;border-radius:5px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500">
+          Triar ubicacio al mapa
+        </button>
+      </div>
       <div class="fa"><button class="bs" onclick="closeOv('new')">Cancellar</button><button class="bp" id="sbtn" onclick="submitInc()">Enviar</button></div>
     </div>
   </div>
