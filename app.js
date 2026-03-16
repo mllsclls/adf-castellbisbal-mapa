@@ -443,7 +443,8 @@ function openDet(id) {
     adm.innerHTML='<div class="at">Gestio admin</div>'+
       '<select class="as" id="adst"><option value="oberta"'+(inc.status==='oberta'?' selected':'')+'>Oberta</option><option value="en_proces"'+(inc.status==='en_proces'?' selected':'')+'>En proces</option><option value="resolta"'+(inc.status==='resolta'?' selected':'')+'>Resolta</option></select>'+
       '<textarea class="ata" id="adnt" placeholder="Notes internes...">'+esc(inc.admin_notes||'')+'</textarea>'+
-      '<button class="asv" onclick="saveAdmin()">Desar canvis</button>';
+      '<button class="asv" onclick="saveAdmin()">Desar canvis</button>'+
+      '<button class="asv" style="background:#C0392B;margin-top:6px" onclick="deleteInc()">Eliminar incidencia</button>';
     body.appendChild(adm);
   }
   document.getElementById('ov-det').classList.add('open');
@@ -518,6 +519,19 @@ window.validatePending = function(id, approve) {
 };
 
 // ── UI ────────────────────────────────────────────────────
+window.deleteInc = function() {
+  if (!detId) return;
+  if (!confirm('Eliminar aquesta incidencia? Aquesta accio no es pot desfer.')) return;
+  fetch(SB_URL+'/rest/v1/incidents?id=eq.'+detId, {
+    method:'DELETE', headers:sbH()
+  }).then(function(r){
+    if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
+    closeOv('det');
+    loadIncidents();
+    alert('Incidencia eliminada.');
+  }).catch(function(err){ alert('Error: '+err.message); });
+};
+
 window.closeOv = function(w) { document.getElementById('ov-'+w).classList.remove('open'); if(w==='det')detId=null; if(w==='edit')editId=null; };
 window.togL = function(type) {
   lvis[type]=!lvis[type];
