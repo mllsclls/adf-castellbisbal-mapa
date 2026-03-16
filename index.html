@@ -283,6 +283,12 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#1A1A1A;display:flex;flex
       <div class="fg"><label>Nom / referencia *</label><input type="text" id="en-name" placeholder="Ex: H100 - Soterrat, Cadenat cami del Bosc..."/></div>
       <div class="fg"><label>Descripcio / observacions</label><textarea id="en-desc" placeholder="Estat, notes importants..."></textarea></div>
       <div class="fg"><label>Reporter</label><input type="text" id="en-rep" placeholder="El teu nom (opcional)"/></div>
+      <div class="fg">
+        <label>Fotografia (opcional)</label>
+        <input type="file" id="en-photo" accept="image/*" capture="environment" onchange="previewElemPhoto(event)"/>
+        <div id="en-size" style="font-size:11px;color:#888;margin-top:4px"></div>
+        <img id="en-prev" style="display:none;width:100%;border-radius:5px;margin-top:6px;max-height:180px;object-fit:cover" alt=""/>
+      </div>
       <div class="locs" id="en-locs">Obtenint GPS...</div>
       <div class="fa"><button class="bs" onclick="closeOv('elem')">Cancellar</button><button class="bp green" id="en-btn" onclick="submitElem()">Enviar proposta</button></div>
     </div>
@@ -294,6 +300,34 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#1A1A1A;display:flex;flex
   <div class="pan">
     <div class="ph" style="background:#1A1A1A"><h2 id="dettit">Incidencia</h2><button class="pc" onclick="closeOv('det')">x</button></div>
     <div class="pb" id="detbody"></div>
+  </div>
+</div>
+
+
+<!-- OVERLAY: Editar element (admin) -->
+<div id="ov-edit" class="ov">
+  <div class="pan">
+    <div class="ph" style="background:#2980B9"><h2 id="edit-title">Editar element</h2><button class="pc" onclick="closeOv('edit')">x</button></div>
+    <div class="pb">
+      <div class="fg"><label>Nom / referencia *</label><input type="text" id="ed-name"/></div>
+      <div class="fg"><label>Descripcio</label><textarea id="ed-desc"></textarea></div>
+      <div class="fg"><label>Ultima revisio</label><input type="text" id="ed-rev" placeholder="dd/mm/aaaa"/></div>
+      <div class="fg">
+        <label>Estat</label>
+        <select id="ed-estat">
+          <option value="operatiu">Operatiu</option>
+          <option value="avaria_menor">Avaria menor</option>
+          <option value="avaria_greu">Avaria greu</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Canviar fotografia (opcional)</label>
+        <input type="file" id="ed-photo" accept="image/*" onchange="previewEditPhoto(event)"/>
+        <div id="ed-size" style="font-size:11px;color:#888;margin-top:4px"></div>
+        <img id="ed-prev" style="display:none;width:100%;border-radius:5px;margin-top:6px;max-height:180px;object-fit:cover" alt=""/>
+      </div>
+      <div class="fa"><button class="bs" onclick="closeOv('edit')">Cancellar</button><button class="bp" style="background:#2980B9" id="ed-btn" onclick="saveEdit()">Desar canvis</button></div>
+    </div>
   </div>
 </div>
 
