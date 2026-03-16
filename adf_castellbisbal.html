@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADF Castellbisbal – Mapa de Recursos</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--red:#C0392B;--red-dk:#922B21;--blue:#1A5276;--green:#1E8449;--amber:#D68910;--purple:#8E44AD;--gm:#D0D0D0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'IBM Plex Sans',sans-serif;background:#1A1A1A;display:flex;flex-direction:column}
+#hdr{background:#1A1A1A;color:#F0F0F0;padding:8px 16px;display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--red);flex-shrink:0}
+#hdr svg{width:24px;height:24px;flex-shrink:0}
+#hdr h1{font-size:14px;font-weight:600;color:#F0F0F0;line-height:1.2}
+#hdr h1 small{color:#AAA;font-size:10px;font-weight:400;display:block;letter-spacing:1px;font-family:'IBM Plex Mono',monospace}
+.hbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#F0F0F0;padding:5px 10px;border-radius:4px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;margin-left:auto}
+.hbtn:hover{background:rgba(255,255,255,.16)}
+.hbtn.on{background:var(--amber);border-color:var(--amber);color:#1A1A1A}
+#app{display:flex;flex:1;overflow:hidden}
+#sb{width:255px;background:#fff;display:flex;flex-direction:column;border-right:1px solid #E0E0E0;flex-shrink:0;overflow:hidden}
+#tabs{display:flex;border-bottom:1px solid #E0E0E0;flex-shrink:0}
+.tab{flex:1;padding:9px 6px;text-align:center;font-size:12px;font-weight:500;color:#888;cursor:pointer;border-bottom:2px solid transparent;user-select:none}
+.tab.act{color:var(--red);border-bottom-color:var(--red)}
+#pl{display:flex;flex-direction:column;flex:1;overflow-y:auto}
+#pi{display:none;flex-direction:column;flex:1;overflow:hidden}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;padding:10px}
+.sc{background:#F7F7F7;border-radius:5px;padding:7px 5px;text-align:center}
+.sn{font-size:20px;font-weight:600;font-family:'IBM Plex Mono',monospace;line-height:1}
+.sl{font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
+.sec{padding:10px 12px 6px;border-bottom:1px solid #F0F0F0}
+.sec h3{font-size:10px;font-weight:600;letter-spacing:1.2px;color:#999;text-transform:uppercase;margin-bottom:8px}
+.row{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:5px;cursor:pointer;margin-bottom:2px}
+.row:hover{background:#F5F5F5}
+.dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.lbl{font-size:13px;font-weight:500;color:#1A1A1A}
+.cnt{font-size:11px;color:#999;font-family:'IBM Plex Mono',monospace;min-width:18px;text-align:right}
+.sw{width:30px;height:17px;background:var(--gm);border-radius:9px;position:relative;transition:background .2s;flex-shrink:0}
+.sw::after{content:'';position:absolute;width:13px;height:13px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sw.on{background:var(--green)}
+.sw.on::after{transform:translateX(13px)}
+.leg{padding:8px 12px;border-bottom:1px solid #F0F0F0}
+.leg h3{font-size:10px;font-weight:600;letter-spacing:1.2px;color:#999;text-transform:uppercase;margin-bottom:7px}
+.lr{display:flex;align-items:center;gap:7px;margin-bottom:4px;font-size:12px;color:#555}
+.ld{width:10px;height:10px;border-radius:50%}
+.ibox{margin:8px 12px;background:#F7F7F7;border-radius:5px;padding:9px 10px}
+.ibox .il{font-size:10px;color:#999;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
+.ibox .it{font-size:11px;color:#666;line-height:1.5}
+.ibox .it.err{color:#C0392B}
+#incbtn{margin:10px 12px;background:var(--red);color:#fff;border:none;padding:9px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0}
+#incbtn:hover{background:var(--red-dk)}
+#iscroll{flex:1;overflow-y:auto;padding:0 10px 10px}
+.ii{border:1px solid #E8E8E8;border-radius:5px;padding:8px 10px;margin-bottom:6px;cursor:pointer}
+.ii:hover{border-color:var(--red)}
+.itit{font-size:13px;font-weight:500;margin-bottom:3px}
+.imet{font-size:11px;color:#888;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.badge{display:inline-block;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:600;text-transform:uppercase}
+.so{background:#F4ECF7;color:#8E44AD}
+.se{background:#FEF9E7;color:#B7770D}
+.sr{background:#D5F5E3;color:#1E8449}
+.noi{text-align:center;padding:24px 14px;color:#BBB;font-size:13px;line-height:1.6}
+#mw{flex:1;position:relative;overflow:hidden}
+#map{width:100%;height:100%}
+#mmbtn{position:absolute;top:10px;right:10px;z-index:999;background:#fff;border:1px solid #D0D0D0;border-radius:5px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;box-shadow:0 2px 6px rgba(0,0,0,.1);display:flex;align-items:center;gap:5px}
+#mmbtn:hover{background:#F5F5F5}
+#locbtn{position:absolute;bottom:28px;right:10px;z-index:999;background:#fff;border:2px solid #D0D0D0;border-radius:5px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#locbtn:hover{border-color:var(--blue)}
+#bar{position:absolute;bottom:0;left:0;right:0;background:rgba(20,20,20,.88);color:#AAA;padding:3px 12px;font-size:10px;display:flex;gap:16px;font-family:'IBM Plex Mono',monospace;z-index:500}
+.up{width:14px;height:14px;border-radius:50%;background:#1A5276;border:3px solid #fff;box-shadow:0 0 0 4px rgba(26,82,118,.25)}
+.ov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:3000;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.ov.open{display:flex}
+.pan{background:#fff;border-radius:8px;width:100%;max-width:460px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.25);margin-top:10px}
+.ph{padding:13px 16px;display:flex;justify-content:space-between;align-items:center}
+.ph h2{font-size:14px;font-weight:600;color:#fff}
+.pc{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;opacity:.8}
+.pb{padding:16px}
+.fg{margin-bottom:11px}
+.fg label{display:block;font-size:11px;font-weight:600;color:#555;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.fg input,.fg textarea{width:100%;padding:7px 10px;border:1px solid #D0D0D0;border-radius:5px;font-size:13px;font-family:inherit;outline:none}
+.fg input:focus,.fg textarea:focus{border-color:var(--red)}
+.fg textarea{resize:vertical;min-height:70px}
+.fa{display:flex;gap:8px;margin-top:14px}
+.bp{flex:1;background:var(--red);color:#fff;border:none;padding:9px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.bs{background:#fff;color:#555;border:1px solid #D0D0D0;padding:9px 16px;border-radius:5px;font-size:13px;cursor:pointer;font-family:inherit}
+.locs{font-size:12px;color:#888;margin-bottom:8px}
+.pprev{margin-top:6px;max-width:100%;max-height:200px;border-radius:5px;display:none;object-fit:cover}
+.wbox{background:#FEF9E7;border:1px solid #F0C040;border-radius:5px;padding:8px 10px;margin-bottom:12px;font-size:12px;color:#7D6608;line-height:1.5}
+.dph{width:100%;border-radius:5px;margin-bottom:12px;max-height:240px;object-fit:cover}
+.dm{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.dd{font-size:13px;color:#444;line-height:1.65;margin-bottom:10px}
+.df{font-size:12px;color:#888;margin-bottom:5px}
+.df strong{color:#444}
+.ab{margin-top:10px;background:#F7F7F7;border-radius:5px;padding:10px;border:1px solid #E0E0E0}
+.at{font-size:10px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+.as{width:100%;padding:6px 8px;border:1px solid #D0D0D0;border-radius:4px;font-size:12px;font-family:inherit;outline:none}
+.ata{width:100%;margin-top:6px;padding:6px 8px;border:1px solid #D0D0D0;border-radius:4px;font-size:12px;font-family:inherit;resize:none;min-height:60px;outline:none}
+.asv{margin-top:7px;width:100%;background:#1A1A1A;color:#fff;border:none;padding:7px;border-radius:4px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500}
+.cc{background:#F4F4F4;padding:2px 5px;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:11px}
+.leaflet-popup-content-wrapper{border-radius:7px!important;box-shadow:0 4px 16px rgba(0,0,0,.15)!important}
+.leaflet-popup-content{margin:12px!important;font-family:'IBM Plex Sans',sans-serif!important;min-width:190px}
+.pimg{width:100%;border-radius:5px;margin-bottom:8px;display:block;max-height:160px;object-fit:cover}
+.ptit{font-weight:600;font-size:14px;margin-bottom:4px;color:#111}
+.pdesc{font-size:12px;color:#666;line-height:1.5}
+.prev{font-size:11px;color:#AAA;margin-top:4px}
+.pbtn{margin-top:8px;width:100%;background:#1A1A1A;color:#fff;border:none;padding:5px 8px;border-radius:4px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500}
+.pbadge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;text-transform:uppercase;margin-right:4px;margin-bottom:5px}
+#load{position:fixed;top:0;left:0;right:0;bottom:0;background:#1A1A1A;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+#load svg{width:48px;height:48px;animation:fp 1.2s ease-in-out infinite}
+@keyframes fp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.9)}}
+#load p{color:#AAA;font-size:13px;font-family:'IBM Plex Mono',monospace}
+</style>
+</head>
+<body>
+<div id="load">
+  <svg viewBox="0 0 48 48" fill="none"><path d="M24 4C24 4 12 18 12 28a12 12 0 0024 0c0-5-4-10-4-10s2 7-4 9c-4 2-8-2-8-7 0-4 4-9 4-9s2 5 5 5c2 0 4-2 4-4 0-6-9-18-9-18z" fill="#C0392B"/><path d="M24 22s-3 4-3 7 2 5 3 5 3-2 3-5-3-7-3-7z" fill="#E74C3C"/></svg>
+  <p>Carregant ADF Castellbisbal...</p>
+</div>
+<div id="hdr">
+  <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 6 9 6 14a6 6 0 0012 0c0-3-2-5-2-5s1 4-2 5c-2 1-4-1-4-4 0-2 2-5 2-5s1 3 3 3c1 0 2-1 2-2 0-3-5-9.5-5-9.5z" fill="#C0392B"/><path d="M12 11s-2 2.5-2 4c0 1.5 1 2.5 2 2.5s2-1 2-2.5-2-4-2-4z" fill="#E74C3C"/></svg>
+  <h1>ADF Castellbisbal <small>MAPA DE RECURSOS</small></h1>
+  <button class="hbtn" id="abtn" onclick="toggleAdmin()">Admin</button>
+</div>
+<div id="app">
+  <div id="sb">
+    <div id="tabs">
+      <div class="tab act" id="tl" onclick="switchTab(0)">Capes</div>
+      <div class="tab" id="ti" onclick="switchTab(1)">Incidencies <span id="itn"></span></div>
+    </div>
+    <div id="pl">
+      <div class="stats">
+        <div class="sc"><div class="sn" id="nh" style="color:var(--red)">0</div><div class="sl">Hidrants</div></div>
+        <div class="sc"><div class="sn" id="nb" style="color:var(--blue)">0</div><div class="sl">Basses</div></div>
+        <div class="sc"><div class="sn" id="nc" style="color:var(--amber)">0</div><div class="sl">Cadenats</div></div>
+      </div>
+      <div class="sec">
+        <h3>Elements del mapa</h3>
+        <div class="row" onclick="togL('hidrants')"><div style="display:flex;align-items:center;gap:8px"><div class="dot" style="background:var(--red)"></div><span class="lbl">Hidrants</span></div><div style="display:flex;align-items:center;gap:7px"><span class="cnt" id="ch">0</span><div class="sw on" id="sw-hidrants"></div></div></div>
+        <div class="row" onclick="togL('basses')"><div style="display:flex;align-items:center;gap:8px"><div class="dot" style="background:var(--blue)"></div><span class="lbl">Basses d'aigua</span></div><div style="display:flex;align-items:center;gap:7px"><span class="cnt" id="cb">0</span><div class="sw on" id="sw-basses"></div></div></div>
+        <div class="row" onclick="togL('cadenats')"><div style="display:flex;align-items:center;gap:8px"><div class="dot" style="background:var(--amber)"></div><span class="lbl">Cadenats</span></div><div style="display:flex;align-items:center;gap:7px"><span class="cnt" id="cc">0</span><div class="sw on" id="sw-cadenats"></div></div></div>
+        <div class="row" onclick="togL('senyals')"><div style="display:flex;align-items:center;gap:8px"><div class="dot" style="background:#E65100"></div><span class="lbl">Senyals de risc</span></div><div style="display:flex;align-items:center;gap:7px"><span class="cnt" id="cs">0</span><div class="sw on" id="sw-senyals"></div></div></div>
+        <div class="row" onclick="togL('incidents')"><div style="display:flex;align-items:center;gap:8px"><div class="dot" style="background:var(--purple)"></div><span class="lbl">Incidencies</span></div><div style="display:flex;align-items:center;gap:7px"><span class="cnt" id="ci">0</span><div class="sw on" id="sw-incidents"></div></div></div>
+      </div>
+      <div class="leg">
+        <h3>Estat hidrants i cadenats</h3>
+        <div class="lr"><div class="ld" style="background:#1E8449"></div>Operatiu</div>
+        <div class="lr"><div class="ld" style="background:#D68910"></div>Avaria menor</div>
+        <div class="lr"><div class="ld" style="background:#C0392B"></div>Avaria greu</div>
+      </div>
+      <div class="sec">
+        <h3>Fons de mapa</h3>
+        <div class="row" onclick="setBase('osm')"><span class="lbl" style="font-size:12px">OpenStreetMap</span><div class="sw on" id="sw-osm"></div></div>
+        <div class="row" onclick="setBase('sat')"><span class="lbl" style="font-size:12px">Satellit (Esri)</span><div class="sw" id="sw-sat"></div></div>
+        <div class="row" onclick="setBase('topo')"><span class="lbl" style="font-size:12px">Topografic</span><div class="sw" id="sw-topo"></div></div>
+      </div>
+      <div class="ibox"><div class="il">Estat connexio</div><div class="it" id="dbinfo">Connectant a Supabase...</div></div>
+    </div>
+    <div id="pi">
+      <button id="incbtn" onclick="openNewInc()">+ Reportar nova incidencia</button>
+      <div id="iscroll"><div class="noi" id="noi">No hi ha incidencies.</div></div>
+    </div>
+  </div>
+  <div id="mw">
+    <div id="map"></div>
+    <button id="mmbtn" onclick="window.open('https://www.google.com/maps/d/viewer?mid=12IXASQTMJsFQhG5xaM9iry_MySqkHEQ','_blank')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      MyMaps original
+    </button>
+    <button id="locbtn" onclick="locate()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1A5276" stroke-width="2.5" width="18" height="18"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22"/><circle cx="12" cy="12" r="8" stroke-width="1.5"/></svg>
+    </button>
+    <div id="bar"><span id="coords">Mou el cursor pel mapa</span><span id="zm">Zoom: 13</span><span id="dbs">--</span></div>
+  </div>
+</div>
+
+<div id="ov-new" class="ov">
+  <div class="pan">
+    <div class="ph" style="background:var(--red)"><h2>Reportar incidencia</h2><button class="pc" onclick="closeOv('new')">x</button></div>
+    <div class="pb">
+      <div class="wbox">La incidencia es geolocalitzara automaticament. Assegura que el navegador te permisos d'ubicacio actius.</div>
+      <div class="fg"><label>Titol *</label><input type="text" id="ftit" placeholder="Ex: Bassa seca, tanca trencada..."/></div>
+      <div class="fg"><label>Descripcio</label><textarea id="fdesc" placeholder="Descriu la incidencia..."></textarea></div>
+      <div class="fg"><label>Reporter</label><input type="text" id="frep" placeholder="El teu nom (opcional)"/></div>
+      <div class="fg"><label>Foto</label><input type="file" id="fphoto" accept="image/*" capture="environment" onchange="prevPhoto(event)"/><img id="fprev" class="pprev" alt=""/></div>
+      <div class="locs" id="locs">Obtenint GPS...</div>
+      <div class="fa"><button class="bs" onclick="closeOv('new')">Cancellar</button><button class="bp" id="sbtn" onclick="submitInc()">Enviar</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="ov-det" class="ov">
+  <div class="pan">
+    <div class="ph" style="background:#1A1A1A"><h2 id="dettit">Incidencia</h2><button class="pc" onclick="closeOv('det')">x</button></div>
+    <div class="pb" id="detbody"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// ── CONFIG ───────────────────────────────────────────────
+var FN_BASE = 'https://zoncbikfhlnigjgnjvjz.supabase.co/functions/v1';
+var ADMIN_PWD = 'adf2024';
+
+// ── ESTAT ────────────────────────────────────────────────
+var mapObj, basemaps, layers;
+var userM = null, userC = null, userLoc = null;
+var isAdmin = false, pendingLoc = null;
+var incList = [], detId = null;
+var lvis = {hidrants:true,basses:true,cadenats:true,senyals:true,incidents:true};
+
+var EC = {operatiu:'#1E8449', avaria_menor:'#D68910', avaria_greu:'#C0392B'};
+var TC = {hidrant:'#C0392B', bassa:'#1A5276', cadenat:'#D68910', senyal:'#E65100', lloc_interes:'#8E44AD'};
+var TL = {hidrant:'Hidrant', bassa:"Bassa d'aigua", cadenat:'Cadenat', senyal:'Senyal risc', lloc_interes:"Lloc d'interes"};
+var EL = {operatiu:'Operatiu', avaria_menor:'Avaria menor', avaria_greu:'Avaria greu'};
+var EB = {operatiu:'#D5F5E3', avaria_menor:'#FEF9E7', avaria_greu:'#FADBD8'};
+var SBG = {oberta:'#F4ECF7', en_proces:'#FEF9E7', resolta:'#D5F5E3'};
+var SCL = {oberta:'#8E44AD', en_proces:'#B7770D', resolta:'#1E8449'};
+
+function mkIco(color, letter, sz) {
+  sz = sz || 28;
+  return L.divIcon({
+    html: '<div style="width:'+sz+'px;height:'+sz+'px;background:'+color+';border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2.5px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);color:#fff;font-size:11px;font-weight:700;font-family:sans-serif;line-height:1">'+letter+'</span></div>',
+    className:'', iconSize:[sz,sz], iconAnchor:[sz/2,sz], popupAnchor:[0,-(sz+4)]
+  });
+}
+function icoFor(type, estat) {
+  var color = (type==='hidrant'||type==='cadenat') ? (EC[estat]||EC.operatiu) : (TC[type]||'#888');
+  var letters = {hidrant:'H',bassa:'B',cadenat:'C',senyal:'S',lloc_interes:'L'};
+  return mkIco(color, letters[type]||'?');
+}
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── INIT ─────────────────────────────────────────────────
+function init() {
+  layers = {hidrants:L.layerGroup(),basses:L.layerGroup(),cadenats:L.layerGroup(),senyals:L.layerGroup(),incidents:L.layerGroup()};
+  mapObj = L.map('map').setView([41.473,1.980],13);
+  basemaps = {
+    osm:  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'OSM',maxZoom:19}),
+    sat:  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri',maxZoom:19}),
+    topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{attribution:'OTM',maxZoom:17})
+  };
+  basemaps.osm.addTo(mapObj);
+  Object.keys(layers).forEach(function(k){layers[k].addTo(mapObj);});
+  mapObj.on('mousemove',function(e){document.getElementById('coords').textContent=e.latlng.lat.toFixed(5)+', '+e.latlng.lng.toFixed(5);});
+  mapObj.on('zoomend',function(){document.getElementById('zm').textContent='Zoom: '+mapObj.getZoom();});
+  document.getElementById('load').style.display='none';
+  loadAll();
+}
+
+// ── CARREGA DES DE SUPABASE EDGE FUNCTIONS (CORS *) ──────
+function loadAll() {
+  document.getElementById('dbinfo').textContent = 'Carregant dades...';
+  fetch(FN_BASE + '/get-map-data')
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(json) {
+      if (json.error) throw new Error(JSON.stringify(json.error));
+      renderMapElements(json.map_elements || []);
+      renderIncidents(json.incidents || []);
+      var t = new Date().toLocaleTimeString('ca-ES');
+      document.getElementById('dbinfo').textContent = (json.map_elements||[]).length + ' elements + ' + (json.incidents||[]).length + ' incidencies. ' + t;
+      document.getElementById('dbs').textContent = 'BD OK';
+    })
+    .catch(function(err) {
+      console.error('loadAll error:', err);
+      document.getElementById('dbinfo').textContent = 'Error: ' + err.message;
+      document.getElementById('dbinfo').classList.add('err');
+      document.getElementById('dbs').textContent = 'Error BD';
+    });
+}
+
+// ── ELEMENTS DEL MAPA ────────────────────────────────────
+function renderMapElements(data) {
+  var cnt = {hidrant:0,bassa:0,cadenat:0,senyal:0};
+  data.forEach(function(el) {
+    var key = el.type==='hidrant'?'hidrants':el.type==='bassa'?'basses':el.type==='cadenat'?'cadenats':el.type==='senyal'?'senyals':null;
+    if (!key) return;
+    var m = L.marker([el.lat,el.lng],{icon:icoFor(el.type,el.estat)});
+    m.bindPopup(elemPop(el),{maxWidth:280});
+    layers[key].addLayer(m);
+    if (cnt[el.type]!==undefined) cnt[el.type]++;
+  });
+  document.getElementById('nh').textContent=cnt.hidrant;
+  document.getElementById('nb').textContent=cnt.bassa;
+  document.getElementById('nc').textContent=cnt.cadenat;
+  document.getElementById('ch').textContent=cnt.hidrant;
+  document.getElementById('cb').textContent=cnt.bassa;
+  document.getElementById('cc').textContent=cnt.cadenat;
+  document.getElementById('cs').textContent=cnt.senyal;
+}
+
+function elemPop(el) {
+  var tc=EC[el.estat]||'#888', tb=EB[el.estat]||'#EEE';
+  var h='';
+  if (el.photo_url) h+='<img src="'+esc(el.photo_url)+'" class="pimg" onerror="this.style.display=\'none\'">';
+  h+='<div style="margin-bottom:6px">';
+  h+='<span class="pbadge" style="background:#EEE;color:#555">'+esc(TL[el.type]||el.type)+'</span>';
+  h+='<span class="pbadge" style="background:'+tb+';color:'+tc+'">'+esc(EL[el.estat]||el.estat)+'</span>';
+  h+='</div>';
+  h+='<div class="ptit">'+esc(el.name)+'</div>';
+  if (el.description) h+='<div class="pdesc">'+esc(el.description)+'</div>';
+  if (el.ultima_revisio) h+='<div class="prev">Revisio: '+esc(el.ultima_revisio)+'</div>';
+  return h;
+}
+
+// ── INCIDENCIES ──────────────────────────────────────────
+function renderIncidents(data) {
+  incList = data || [];
+  var scroll = document.getElementById('iscroll');
+  var noi = document.getElementById('noi');
+  document.getElementById('ci').textContent = incList.length;
+  document.getElementById('itn').textContent = incList.length > 0 ? '('+incList.length+')' : '';
+  scroll.querySelectorAll('.ii').forEach(function(el){el.remove();});
+  if (incList.length===0){noi.style.display='block';return;}
+  noi.style.display='none';
+  layers.incidents.clearLayers();
+  incList.forEach(function(inc) {
+    var bg=SBG[inc.status]||'#EEE', col=SCL[inc.status]||'#333';
+    // Llista sidebar
+    var div=document.createElement('div');
+    div.className='ii';
+    div.onclick=function(){mapObj.setView([inc.lat,inc.lng],16);openDet(inc.id);};
+    div.innerHTML='<div class="itit">'+esc(inc.title)+'</div><div class="imet"><span class="badge" style="background:'+bg+';color:'+col+'">'+inc.status.replace('_',' ')+'</span><span>'+new Date(inc.created_at).toLocaleDateString('ca-ES')+'</span><span>'+esc(inc.reporter||'Anonim')+'</span></div>';
+    scroll.insertBefore(div,noi);
+    // Marcador mapa
+    var marker=L.marker([inc.lat,inc.lng],{icon:mkIco(col,'!',26)});
+    marker.bindPopup(incPop(inc),{maxWidth:270});
+    marker.on('click',function(){openDet(inc.id);});
+    layers.incidents.addLayer(marker);
+  });
+}
+
+function incPop(inc) {
+  var bg=SBG[inc.status]||'#EEE', col=SCL[inc.status]||'#333';
+  var h='';
+  if (inc.photo_url) h+='<img src="'+esc(inc.photo_url)+'" class="pimg" onerror="this.style.display=\'none\'">';
+  h+='<span class="pbadge" style="background:'+bg+';color:'+col+'">'+inc.status.replace('_',' ')+'</span>';
+  h+='<div class="ptit">'+esc(inc.title)+'</div>';
+  if (inc.description) h+='<div class="pdesc">'+esc(inc.description)+'</div>';
+  h+='<div style="font-size:11px;color:#AAA;margin-top:5px">'+esc(inc.reporter||'Anonim')+' - '+new Date(inc.created_at).toLocaleDateString('ca-ES')+'</div>';
+  h+='<button class="pbtn" onclick="window._od(\''+inc.id+'\')">Veure detall</button>';
+  return h;
+}
+window._od = function(id){openDet(id);};
+
+// ── NOVA INCIDENCIA ──────────────────────────────────────
+window.openNewInc = function() {
+  pendingLoc=null;
+  document.getElementById('ftit').value='';
+  document.getElementById('fdesc').value='';
+  document.getElementById('frep').value='';
+  document.getElementById('fphoto').value='';
+  document.getElementById('fprev').style.display='none';
+  document.getElementById('locs').textContent='Obtenint GPS...';
+  document.getElementById('locs').style.color='#888';
+  document.getElementById('ov-new').classList.add('open');
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(p){pendingLoc={lat:p.coords.latitude,lng:p.coords.longitude};document.getElementById('locs').textContent='OK: '+pendingLoc.lat.toFixed(5)+', '+pendingLoc.lng.toFixed(5)+' (+-'+Math.round(p.coords.accuracy)+'m)';document.getElementById('locs').style.color='#1E8449';},
+      function(){document.getElementById('locs').textContent='No s ha pogut obtenir la ubicacio.';document.getElementById('locs').style.color='#C0392B';},
+      {enableHighAccuracy:true,timeout:12000}
+    );
+  }
+};
+
+window.prevPhoto = function(e) {
+  var file=e.target.files[0]; if(!file) return;
+  var r=new FileReader(); r.onload=function(ev){var i=document.getElementById('fprev');i.src=ev.target.result;i.style.display='block';}; r.readAsDataURL(file);
+};
+
+window.submitInc = function() {
+  var title=document.getElementById('ftit').value.trim();
+  if (!title){alert('Cal afegir un titol.');return;}
+  if (!pendingLoc){alert('No s ha pogut obtenir la ubicacio GPS.');return;}
+  var btn=document.getElementById('sbtn'); btn.textContent='Enviant...'; btn.disabled=true;
+
+  // Nota: foto no suportada sense Supabase SDK - es pot afegir mas endavant
+  fetch(FN_BASE+'/incidents', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      title: title,
+      description: document.getElementById('fdesc').value.trim(),
+      reporter: document.getElementById('frep').value.trim()||'Anonim',
+      lat: pendingLoc.lat,
+      lng: pendingLoc.lng,
+      status: 'oberta'
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(json){
+    btn.textContent='Enviar'; btn.disabled=false;
+    if (json.error) throw new Error(JSON.stringify(json.error));
+    closeOv('new');
+    loadAll();
+    switchTab(1);
+    alert('Incidencia registrada. Gracies!');
+  })
+  .catch(function(err){
+    btn.textContent='Enviar'; btn.disabled=false;
+    alert('Error: '+err.message);
+  });
+};
+
+// ── DETALL INCIDENCIA ────────────────────────────────────
+function openDet(id) {
+  var inc=null;
+  for(var i=0;i<incList.length;i++){if(incList[i].id===id){inc=incList[i];break;}}
+  if (!inc) return;
+  detId=id;
+  document.getElementById('dettit').textContent=inc.title;
+  var bg=SBG[inc.status]||'#EEE', col=SCL[inc.status]||'#333';
+  var adminHtml='';
+  if (isAdmin) {
+    adminHtml='<div class="ab"><div class="at">Gestio administrador</div>'+
+      '<select class="as" id="adst"><option value="oberta"'+(inc.status==='oberta'?' selected':'')+'>Oberta</option><option value="en_proces"'+(inc.status==='en_proces'?' selected':'')+'>En proces</option><option value="resolta"'+(inc.status==='resolta'?' selected':'')+'>Resolta</option></select>'+
+      '<textarea class="ata" id="adnt" placeholder="Notes internes...">'+esc(inc.admin_notes||'')+'</textarea>'+
+      '<button class="asv" onclick="saveAdmin()">Desar canvis</button></div>';
+  }
+  document.getElementById('detbody').innerHTML=
+    (inc.photo_url?'<img src="'+esc(inc.photo_url)+'" class="dph" onerror="this.style.display=\'none\'">'  :'')+
+    '<div class="dm"><span class="badge" style="background:'+bg+';color:'+col+'">'+inc.status.replace('_',' ')+'</span><span style="font-size:12px;color:#888">'+new Date(inc.created_at).toLocaleString('ca-ES')+'</span></div>'+
+    (inc.description?'<div class="dd">'+esc(inc.description)+'</div>':'')+
+    '<div class="df">Reporter: <strong>'+esc(inc.reporter||'Anonim')+'</strong></div>'+
+    '<div class="df">Coords: <span class="cc">'+inc.lat.toFixed(5)+', '+inc.lng.toFixed(5)+'</span></div>'+
+    (inc.admin_notes?'<div style="background:#FEF9E7;border:1px solid #F0C040;border-radius:5px;padding:8px;margin-top:8px;font-size:12px;color:#7D6608"><strong>Notes equip:</strong> '+esc(inc.admin_notes)+'</div>':'')+
+    adminHtml;
+  document.getElementById('ov-det').classList.add('open');
+}
+
+window.saveAdmin = function() {
+  if (!detId) return;
+  fetch(FN_BASE+'/incidents?id='+detId, {
+    method:'PATCH',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({status:document.getElementById('adst').value,admin_notes:document.getElementById('adnt').value.trim()})
+  })
+  .then(function(r){return r.json();})
+  .then(function(json){
+    if (json.error) throw new Error(JSON.stringify(json.error));
+    closeOv('det'); loadAll(); alert('Canvis desats.');
+  })
+  .catch(function(err){alert('Error: '+err.message);});
+};
+
+// ── UI ───────────────────────────────────────────────────
+window.closeOv=function(w){document.getElementById('ov-'+w).classList.remove('open');if(w==='det')detId=null;};
+window.switchTab=function(n){
+  document.getElementById('tl').classList.toggle('act',n===0);
+  document.getElementById('ti').classList.toggle('act',n===1);
+  document.getElementById('pl').style.display=n===0?'flex':'none';
+  document.getElementById('pi').style.display=n===1?'flex':'none';
+};
+window.togL=function(type){
+  lvis[type]=!lvis[type];
+  var sw=document.getElementById('sw-'+type);
+  if(lvis[type]){sw.classList.add('on');layers[type].addTo(mapObj);}
+  else{sw.classList.remove('on');mapObj.removeLayer(layers[type]);}
+};
+window.setBase=function(name){
+  ['osm','sat','topo'].forEach(function(b){document.getElementById('sw-'+b).classList.remove('on');if(basemaps[b]&&mapObj.hasLayer(basemaps[b]))mapObj.removeLayer(basemaps[b]);});
+  basemaps[name].addTo(mapObj);document.getElementById('sw-'+name).classList.add('on');
+};
+window.locate=function(){
+  if(!navigator.geolocation){alert('El navegador no suporta geolocalitzacio.');return;}
+  navigator.geolocation.getCurrentPosition(
+    function(p){
+      var lat=p.coords.latitude,lng=p.coords.longitude,acc=p.coords.accuracy;
+      userLoc={lat:lat,lng:lng};
+      if(userM){mapObj.removeLayer(userM);mapObj.removeLayer(userC);}
+      userC=L.circle([lat,lng],{radius:acc,color:'#1A5276',fillColor:'#D6EAF8',fillOpacity:.25,weight:1.5}).addTo(mapObj);
+      userM=L.marker([lat,lng],{icon:L.divIcon({html:'<div class="up"></div>',className:'',iconSize:[14,14],iconAnchor:[7,7]})}).addTo(mapObj);
+      userM.bindPopup('<strong>La teva ubicacio</strong><br><small>Precisio: +-'+Math.round(acc)+'m</small>');
+      mapObj.setView([lat,lng],16);
+      document.getElementById('locbtn').style.borderColor='#1A5276';
+    },
+    function(){alert('No s ha pogut obtenir la ubicacio.');},
+    {enableHighAccuracy:true,timeout:12000}
+  );
+};
+window.toggleAdmin=function(){
+  if(isAdmin){isAdmin=false;document.getElementById('abtn').textContent='Admin';document.getElementById('abtn').classList.remove('on');}
+  else{var p=prompt('Contrasenya:');if(p===ADMIN_PWD){isAdmin=true;document.getElementById('abtn').textContent='Admin ON';document.getElementById('abtn').classList.add('on');}else if(p!==null)alert('Contrasenya incorrecta.');}
+};
+
+// ── ARRENCA ──────────────────────────────────────────────
+(function wait(){if(typeof L!=='undefined'){init();}else{setTimeout(wait,50);}})();
+</script>
+</body>
+</html>
