@@ -154,6 +154,32 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#1A1A1A;display:flex;flex
   #sb.collapsed{width:0}
   #hdr h1 small{display:none}
 }
+
+/* Botó xuletes */
+#xbtn{position:absolute;bottom:36px;right:54px;z-index:999;background:#F39C12;border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.3);font-size:20px;line-height:1}
+#xbtn:hover{background:#E67E22}
+
+/* Panel xuletes */
+#xpanel{position:absolute;bottom:82px;right:10px;z-index:998;background:#fff;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.2);width:300px;max-height:70vh;overflow-y:auto;display:none}
+#xpanel.open{display:block}
+#xpanel .xhdr{background:#1A1A1A;color:#fff;padding:11px 14px;border-radius:8px 8px 0 0;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+#xpanel .xhdr button{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;opacity:.7;line-height:1}
+.xsec{border-bottom:1px solid #F0F0F0}
+.xsec-hdr{padding:10px 14px;font-size:12px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;color:#333}
+.xsec-hdr:hover{background:#F9F9F9}
+.xsec-hdr .xtag{font-size:10px;background:#EAFAF1;color:#1E8449;padding:2px 7px;border-radius:10px;font-weight:600}
+.xsec-body{padding:0 14px 12px;display:none;font-size:12px;color:#444;line-height:1.7}
+.xsec-body.open{display:block}
+.xsec-body table{width:100%;border-collapse:collapse;margin-top:4px}
+.xsec-body td{padding:4px 6px;border-bottom:1px solid #F0F0F0;vertical-align:top}
+.xsec-body td:first-child{font-weight:600;color:#1A1A1A;white-space:nowrap;min-width:70px}
+.xsec-body .canal{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #F5F5F5}
+.xsec-body .cnum{background:#C0392B;color:#fff;font-weight:700;font-size:13px;padding:3px 9px;border-radius:4px;font-family:monospace;flex-shrink:0}
+.xsec-body .cfum{margin-bottom:8px}
+.xsec-body .cfum strong{display:block;color:#1A1A1A;margin-bottom:2px}
+.xsec-arrow{font-size:10px;color:#AAA;transition:transform .2s}
+.xsec-arrow.open{transform:rotate(180deg)}
+@media(max-width:600px){#xpanel{width:calc(100vw - 20px);right:10px}}
 </style>
 </head>
 <body>
@@ -231,6 +257,75 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#1A1A1A;display:flex;flex
     <button id="locbtn" onclick="locate()" title="La meva ubicacio">
       <svg viewBox="0 0 24 24" fill="none" stroke="#1A5276" stroke-width="2.5" width="18" height="18"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22"/><circle cx="12" cy="12" r="8" stroke-width="1.5"/></svg>
     </button>
+    <button id="xbtn" onclick="toggleXuletes()" title="Xuletes i informació rapida">💡</button>
+
+    <div id="xpanel">
+      <div class="xhdr"><span>💡 Informació ràpida</span><button onclick="toggleXuletes()">×</button></div>
+
+      <!-- CODIS VEHICLES -->
+      <div class="xsec">
+        <div class="xsec-hdr" onclick="toggleXsec('vehicles')">
+          <span>🚒 Codis de vehicles</span>
+          <span style="display:flex;align-items:center;gap:6px"><span class="xtag">6 vehicles</span><span class="xsec-arrow" id="arr-vehicles">▼</span></span>
+        </div>
+        <div class="xsec-body" id="xsec-vehicles">
+          <table>
+            <tr><td>179-201</td><td>Camió · Pegaso Egipci · 3.000 L</td></tr>
+            <tr><td>179-202</td><td>Camió · Mercedes Atego · 3.500 L</td></tr>
+            <tr><td>179-401</td><td>Kit · Defender · 500 L</td></tr>
+            <tr><td>179-402</td><td>Kit · Toyota Hilux · 500 L</td></tr>
+            <tr><td>179-403</td><td>Kit · Toyota Hilux · 500 L</td></tr>
+            <tr><td>179-601</td><td>Transport · Nissan Terrano</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- CANALS EMISSORES -->
+      <div class="xsec">
+        <div class="xsec-hdr" onclick="toggleXsec('canals')">
+          <span>📻 Canals emissores</span>
+          <span style="display:flex;align-items:center;gap:6px"><span class="xtag">150 Hz</span><span class="xsec-arrow" id="arr-canals">▼</span></span>
+        </div>
+        <div class="xsec-body" id="xsec-canals">
+          <div class="canal"><span class="cnum">C1</span><span>Coordinació Municipal</span></div>
+          <div class="canal"><span class="cnum">C5</span><span>Coordinació Comarcal (Vallès Occ.)</span></div>
+          <div class="canal"><span class="cnum">C4</span><span>Torres de vigilància (només escolta)</span></div>
+        </div>
+      </div>
+
+      <!-- COLUMNES DE FUM -->
+      <div class="xsec">
+        <div class="xsec-hdr" onclick="toggleXsec('fum')">
+          <span>🔥 Columnes de fum</span>
+          <span style="display:flex;align-items:center;gap:6px"><span class="xtag">3 indicadors</span><span class="xsec-arrow" id="arr-fum">▼</span></span>
+        </div>
+        <div class="xsec-body" id="xsec-fum">
+          <div class="cfum">
+            <strong>Color → Intensitat del foc</strong>
+            Fum fosc = combustible sec = foc intens<br>
+            Fum blanc = combustible humit = foc menys intens
+          </div>
+          <div class="cfum">
+            <strong>Densitat → Força de l&apos;incendi</strong>
+            Molt densa = gran convecció, aspira molt d&apos;aire<br>
+            Poc densa = incendi menys actiu
+          </div>
+          <div class="cfum">
+            <strong>Dispersió → Focus secundaris</strong>
+            Un punt = focus únic<br>
+            Diversos punts = múltiples focus d&apos;ignició
+          </div>
+          <div class="cfum">
+            <strong>Forma → Vent i propagació</strong>
+            Vertical = sense vent, propagació lenta<br>
+            Inclinada = vent en superfície<br>
+            Partida en alçada = vents en capes distintes
+          </div>
+        </div>
+      </div>
+
+    </div>
+
     <div id="bar"><span id="coords">Mou el cursor pel mapa</span><span id="zm">Zoom: 13</span><span id="dbs">Carregant...</span></div>
   </div>
 </div>
@@ -353,5 +448,17 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#1A1A1A;display:flex;flex
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="app.js"></script>
+
+<script>
+function toggleXuletes(){
+  document.getElementById('xpanel').classList.toggle('open');
+}
+function toggleXsec(id){
+  var body = document.getElementById('xsec-'+id);
+  var arr  = document.getElementById('arr-'+id);
+  var open = body.classList.toggle('open');
+  arr.classList.toggle('open', open);
+}
+</script>
 </body>
 </html>
