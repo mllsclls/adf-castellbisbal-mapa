@@ -84,6 +84,9 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#1A1A1A;display:flex;flex
 #mw{flex:1;position:relative;overflow:hidden}
 #map{width:100%;height:100%}
 #locbtn{position:absolute;bottom:28px;right:10px;z-index:999;background:#fff;border:2px solid #D0D0D0;border-radius:5px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+/* Controls zoom sempre a la dreta, mai tapats pel sidebar */
+.leaflet-top.leaflet-left .leaflet-control-zoom{display:none}
+.leaflet-top.leaflet-right .leaflet-control-zoom{display:block}
 #bar{position:absolute;bottom:0;left:0;right:0;background:rgba(20,20,20,.88);color:#AAA;padding:3px 12px;font-size:10px;display:flex;gap:16px;font-family:'IBM Plex Mono',monospace;z-index:500}
 .up{width:14px;height:14px;border-radius:50%;background:#1A5276;border:3px solid #fff;box-shadow:0 0 0 4px rgba(26,82,118,.25)}
 
