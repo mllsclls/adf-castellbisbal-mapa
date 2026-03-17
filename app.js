@@ -101,7 +101,8 @@ function uploadPhoto(file, bucket) {
 // ── INIT ─────────────────────────────────────────────────
 function init() {
   layers = {hidrants:L.layerGroup(), basses:L.layerGroup(), cadenats:L.layerGroup(), senyals:L.layerGroup(), incidents:L.layerGroup()};
-  mapObj = L.map('map').setView([41.473, 1.980], 13);
+  mapObj = L.map('map', {zoomControl: false}).setView([41.473, 1.980], 13);
+  L.control.zoom({position: 'topright'}).addTo(mapObj);
   basemaps = {
     osm:  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'OSM',maxZoom:19}),
     sat:  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri',maxZoom:19}),
