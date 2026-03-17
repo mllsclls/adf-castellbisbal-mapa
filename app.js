@@ -1,6 +1,5 @@
 var SB_URL  = 'https://zoncbikfhlnigjgnjvjz.supabase.co';
 var SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvbmNiaWtmaGxuaWdqZ25qdmp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2MjU3MTQsImV4cCI6MjA4OTIwMTcxNH0.V1yXTM6MZWdouvITGNj9ngS6YBgeio9pwHLXMogqR8E';
-var ADMIN_PWD = 'adf2024';
 
 var mapObj, basemaps, layers;
 var userMarker = null, userCircle = null;
@@ -603,16 +602,40 @@ window.setBase = function(name) {
   basemaps[name].addTo(mapObj);document.getElementById('sw-'+name).classList.add('on');
 };
 window.toggleAdmin = function() {
-  if(isAdmin){
-    isAdmin=false;document.getElementById('abtn').textContent='Admin';document.getElementById('abtn').classList.remove('on');
-    document.getElementById('tp').style.display='none';switchTab(0);
-  } else {
-    var p=prompt('Contrasenya:');
-    if(p===ADMIN_PWD){
-      isAdmin=true;document.getElementById('abtn').textContent='Admin ON';document.getElementById('abtn').classList.add('on');
-      document.getElementById('tp').style.display='block';loadPending();
-    } else if(p!==null){alert('Incorrecta.');}
+  if (isAdmin) {
+    isAdmin = false;
+    document.getElementById('abtn').textContent = 'Admin';
+    document.getElementById('abtn').classList.remove('on');
+    document.getElementById('tp').style.display = 'none';
+    switchTab(0);
+    return;
   }
+  var p = prompt('Contrasenya admin:');
+  if (p === null) return;
+  var btn = document.getElementById('abtn');
+  btn.textContent = '...'; btn.disabled = true;
+  fetch(SB_URL+'/functions/v1/admin-auth', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json', apikey: SB_KEY},
+    body: JSON.stringify({password: p})
+  }).then(function(r){ return r.json(); })
+  .then(function(data){
+    btn.disabled = false;
+    if (data.ok) {
+      isAdmin = true;
+      btn.textContent = 'Admin ON';
+      btn.classList.add('on');
+      document.getElementById('tp').style.display = 'block';
+      loadPending();
+    } else {
+      btn.textContent = 'Admin';
+      alert('Contrasenya incorrecta.');
+    }
+  }).catch(function(){
+    btn.disabled = false;
+    btn.textContent = 'Admin';
+    alert('Error de connexio. Torna a intentar-ho.');
+  });
 };
 
 (function wait(){ if(typeof L!=='undefined'){ init(); } else { setTimeout(wait,50); } })();
